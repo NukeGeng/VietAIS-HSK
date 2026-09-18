@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VietAisHsk.Api/VietAisHsk.Api.csproj" />
+  </Folder>
+</Solution>

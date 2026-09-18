@@ -1,0 +1,255 @@
+# Curriculum Module
+
+## 1. Mục đích
+
+Là source of truth cho nội dung học có cấu trúc: HSK 3.0, người mới bắt đầu, Pinyin, thanh điệu, từ vựng, chữ Hán, ngữ pháp và lesson composition.
+
+## 2. Phạm vi
+
+### Có làm
+- SyllabusVersion;
+- HSK 1–9;
+- Topic / Unit / Lesson;
+- BeginnerTrack / BeginnerStage / BeginnerLesson;
+- Pinyin initials/finals/syllables;
+- tone rules;
+- Vocabulary;
+- Hanzi + stroke metadata/reference;
+- GrammarPoint;
+- draft/published status;
+- mapping knowledge ↔ lesson/topic/level.
+
+### Không làm
+- learner progress;
+- practice attempt;
+- Hanzi writing attempt;
+- review schedule;
+- audio generation worker;
+- story/video extended content body.
+
+## 3. Actor & phân quyền
+
+| Actor | Quyền |
+|---|---|
+| Guest | đọc public/published curriculum nếu product cho phép preview |
+| Learner | đọc published curriculum |
+| Admin | CRUD/publish khi có `curriculum.manage` |
+
+Learner không thấy draft content.
+
+## 4. Chức năng
+
+### 4.1 HSK path
+
+```text
+SyllabusVersion
+→ HskLevel
+→ Topic
+→ Unit
+→ Lesson
+```
+
+Lesson reference Vocabulary/Hanzi/Grammar/skills, không copy master data vào lesson document.
+
+### 4.2 Beginner path
+
+```text
+Pinyin
+→ Thanh điệu
+→ Âm đầu/Vần
+→ Ghép âm
+→ Hanzi/nét cơ bản
+→ Bài làm quen
+```
+
+Beginner lesson tái sử dụng master entities.
+
+### 4.3 Pinyin & thanh điệu
+
+Master data hỗ trợ:
+- học;
+- tra cứu;
+- Practice tạo bài;
+- audio reference nếu có.
+
+### 4.4 Vocabulary
+
+Tối thiểu:
+- Simplified;
+- Pinyin;
+- POS nếu có;
+- HSK mapping/version;
+- platform Vietnamese meanings/examples qua content enrichment model đã duyệt;
+- audio asset reference.
+
+### 4.5 Hanzi
+
+Tối thiểu:
+- character;
+- reading(s);
+- meaning;
+- radical;
+- stroke count;
+- HSK mapping/version;
+- `HanziStrokeSetId`/stroke reference;
+- related Vocabulary queryable.
+
+Curriculum chỉ sở hữu reference data; Practice sở hữu learner writing attempt.
+
+### 4.6 Grammar
+
+- HSK mapping/version;
+- pattern;
+- simple Vietnamese explanation;
+- examples;
+- common mistakes khi authored;
+- lesson/topic references.
+
+### 4.7 Publish
+
+Status tối thiểu:
+
+```text
+Draft
+Published
+Archived
+```
+
+Published content không được silently mutate theo cách làm hỏng learner history; thay đổi lớn cần version hoặc content revision strategy.
+
+## 5. Invariants
+
+- HSK mapping luôn gắn SyllabusVersion.
+- Lesson không reference entity không tồn tại.
+- Learner chỉ đọc Published.
+- Hanzi stroke metadata phải có source/version/license reference khi đến từ external dataset.
+- Không duplicate master Vocabulary/Hanzi trong beginner path.
+
+## 6. Data model
+
+### Documents
+
+```text
+SyllabusVersion
+HskLevel
+Topic
+Unit
+Lesson
+BeginnerTrack
+BeginnerStage
+BeginnerLesson
+PinyinInitial
+PinyinFinal
+PinyinSyllable
+ToneRule
+Vocabulary
+Hanzi
+HanziStrokeSet
+GrammarPoint
+```
+
+### Event streams
+
+Không dùng Event Sourcing cho curriculum CRUD.
+
+### Read models
+
+Có thể dùng Marten document/query trực tiếp; chỉ projection khi cần denormalized catalog hiệu năng.
+
+## 7. Commands
+
+| Command | Mục đích |
+|---|---|
+| ImportHskDataset | import official/reference dataset đã validate |
+| UpsertVocabulary | quản trị vocabulary |
+| UpsertHanzi | quản trị Hanzi |
+| UpsertGrammarPoint | quản trị grammar |
+| UpsertPinyinData | quản trị Pinyin |
+| SaveLessonDraft | lưu lesson draft |
+| PublishLesson | publish lesson |
+| PublishCurriculumNode | publish node được phép |
+
+## 8. Queries
+
+| Query | Mục đích |
+|---|---|
+| GetHskLevels | level list |
+| GetCurriculumTree | topic/unit/lesson tree |
+| GetBeginnerTrack | beginner path |
+| SearchVocabulary | tra cứu từ |
+| SearchHanzi | tra cứu chữ |
+| GetHanziStrokeData | renderer/Practice cần stroke reference |
+| SearchGrammar | tra cứu grammar |
+| GetPinyinFoundation | Pinyin/tone learning data |
+
+## 9. Events/messages
+
+Không Event Source.
+
+Có thể phát `CurriculumContentPublished` khi module khác cần invalidate cache/index; không bắt buộc cho MVP.
+
+## 10. API gợi ý
+
+Public/learner:
+
+```text
+GET /api/curriculum/hsk-levels
+GET /api/curriculum/hsk/{level}/tree
+GET /api/curriculum/beginner
+GET /api/vocabulary
+GET /api/vocabulary/{id}
+GET /api/hanzi
+GET /api/hanzi/{id}
+GET /api/hanzi/{id}/strokes
+GET /api/grammar
+GET /api/foundation/pinyin
+GET /api/foundation/tones
+```
+
+Admin endpoints nằm dưới `/api/admin/...` và yêu cầu `curriculum.manage`.
+
+## 11. RabbitMQ
+
+Không cho CRUD curriculum.
+
+Audio generation được gửi qua Content/Media workflow, không chạy model trong Curriculum handler.
+
+## 12. AI
+
+Không.
+
+## 13. Dependencies
+
+Không phụ thuộc learner modules.
+
+Content có thể cung cấp AudioAsset metadata; tránh circular dependency bằng ID/contract đơn giản.
+
+## 14. Test cases
+
+### Unit
+- [ ] syllabus version mapping;
+- [ ] publish validation;
+- [ ] lesson reference validation;
+- [ ] Hanzi stroke metadata source required.
+
+### Integration
+- [ ] import idempotency/duplicate handling;
+- [ ] published-only learner queries;
+- [ ] beginner path references master data;
+- [ ] Hanzi stroke read endpoint.
+
+### Permission
+- [ ] learner không mutate curriculum;
+- [ ] admin thiếu permission không publish.
+
+### Computer Use
+- [ ] Người mới bắt đầu load Pinyin/tone;
+- [ ] Nền tảng → Chữ Hán → xem stroke order;
+- [ ] search vocabulary/grammar đúng filter HSK.
+
+## 15. Acceptance Criteria
+
+- [ ] HSK 3.0 và Beginner data có model rõ;
+- [ ] Pinyin/tone/Hanzi writing reference data đủ cho UI/Practice;
+- [ ] no learner progress stored here;
+- [ ] no AI/RabbitMQ misuse.

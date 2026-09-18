@@ -1,0 +1,16 @@
+.DS_Store
+
+**/bin/
+**/obj/
+
+.idea/
+.vscode/
+
+*.user
+*.suo
+
+node_modules/
+dist/
+
+# The approved template is maintained as its own repository.
+design-template/
