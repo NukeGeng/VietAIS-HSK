@@ -47,3 +47,21 @@ public sealed record ExamResult(
     int Correct,
     int Total,
     IReadOnlyList<string> IncorrectQuestionIds);
+
+public sealed record ExamQuestionView(string Id, string Prompt);
+
+public sealed record ExamDefinitionView(
+    string Id,
+    string Name,
+    string HskLevel,
+    string ContentVersion,
+    IReadOnlyList<ExamQuestionView> Questions);
+
+public sealed record ExamAttemptView(
+    string Id,
+    string ExamId,
+    string ContentVersion,
+    ExamAttemptStatus Status,
+    IReadOnlyList<ExamQuestionView> Questions,
+    IReadOnlyDictionary<string, string> Answers,
+    int? ObjectiveScore);

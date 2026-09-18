@@ -24,3 +24,9 @@
 - Không dùng AI cho objective grading.
 - Không dùng RabbitMQ khi exam không có subjective section.
 - Subjective grading/outbox worker vẫn để bước sau khi có decision và content thật.
+
+## EXAM-FIX-002 — Public exam views không lộ answer key/event stream
+
+- Tách public definition/attempt view khỏi domain model.
+- Catalog và attempt response chỉ trả prompt, answers learner đã nhập và score cần thiết.
+- Smoke test assert không có `acceptedAnswers` và `events`.

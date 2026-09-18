@@ -1,3 +1,3 @@
 # Fixed
 
-Chưa có fix được xác nhận.
+- ReviewView đã nối summary, mistakes và needs-review với loading/error/empty state.

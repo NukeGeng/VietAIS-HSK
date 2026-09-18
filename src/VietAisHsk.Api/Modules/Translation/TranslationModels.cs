@@ -25,3 +25,16 @@ public sealed record TranslationFeedback(
     string Naturalness,
     string SuggestedRevision,
     string Status);
+
+public sealed record TranslationExerciseView(
+    string Id,
+    string PromptVietnamese,
+    string HskContext,
+    string Status);
+
+public sealed record TranslationAttemptView(
+    string Id,
+    string ExerciseId,
+    string AnswerChinese,
+    DateTimeOffset SubmittedAt,
+    TranslationFeedback? Feedback);

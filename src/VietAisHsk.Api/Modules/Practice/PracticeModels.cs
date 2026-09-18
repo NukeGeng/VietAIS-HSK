@@ -47,3 +47,17 @@ public sealed record PracticeSessionResult(
     int NeedsRetry,
     int Answered,
     int Total);
+
+public sealed record PracticeQuestionView(
+    string Id,
+    string Type,
+    string Prompt,
+    string Status);
+
+public sealed record PracticeSessionView(
+    string Id,
+    PracticeSessionStatus Status,
+    IReadOnlyList<PracticeQuestionView> Questions,
+    IReadOnlyList<QuestionAttempt> Attempts,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);

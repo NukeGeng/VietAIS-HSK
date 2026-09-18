@@ -147,6 +147,7 @@ const practiceSessionResponse = await request("/api/practice/sessions", {
   body: JSON.stringify({ questionIds: ["bootstrap-vocab-hello"] })
 });
 assert(practiceSessionResponse.response.status === 201, `practice session expected 201, got ${practiceSessionResponse.response.status}`);
+assert(!practiceSessionResponse.body?.questions?.[0]?.acceptedAnswers, "practice session leaked accepted answers");
 const practiceSessionId = practiceSessionResponse.body?.id;
 assert(typeof practiceSessionId === "string", "practice session id is missing");
 
@@ -228,12 +229,14 @@ assert(correctAnswer.response.status === 200 && correctAnswer.body?.result === "
 
 const exams = await request("/api/exams");
 assert(exams.response.status === 200 && exams.body?.length === 1, "exam catalog did not load");
+assert(!exams.body?.[0]?.questions?.[0]?.acceptedAnswers, "exam catalog leaked accepted answers");
 
 const examStart = await request("/api/exams/bootstrap-hsk3-mini/attempts", {
   method: "POST",
   headers: userHeaders
 });
 assert(examStart.response.status === 201, `exam start expected 201, got ${examStart.response.status}`);
+assert(!examStart.body?.questions?.[0]?.acceptedAnswers && !examStart.body?.events, "exam attempt leaked answer keys or event stream");
 const attemptId = examStart.body?.id;
 assert(typeof attemptId === "string", "exam attempt id is missing");
 
@@ -280,6 +283,7 @@ assert(examResult.response.status === 200 && examResult.body?.objectiveScore ===
 
 const translationExercises = await request("/api/translation/exercises");
 assert(translationExercises.response.status === 200 && translationExercises.body?.length === 1, "translation exercise catalog did not load");
+assert(!translationExercises.body?.[0]?.referenceChinese, "translation catalog leaked reference answer");
 
 const translationAttemptResponse = await request("/api/translation/exercises/bootstrap-translation-1/attempts", {
   method: "POST",
@@ -287,6 +291,7 @@ const translationAttemptResponse = await request("/api/translation/exercises/boo
   body: JSON.stringify({ answerChinese: "我喜欢学习中文。" })
 });
 assert(translationAttemptResponse.response.status === 201, "translation attempt was not saved");
+assert(!translationAttemptResponse.body?.referenceChinese, "translation attempt leaked reference answer");
 const translationAttemptId = translationAttemptResponse.body?.id;
 
 const translationFeedback = await request(`/api/translation/attempts/${translationAttemptId}/feedback`, {

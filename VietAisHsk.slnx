@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/VietAisHsk.Api/VietAisHsk.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VietAisHsk.Api.Tests/VietAisHsk.Api.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -161,6 +161,8 @@ Không cần Event Source toàn bộ PracticeSession.
 
 ## 9. API gợi ý
 
+Bootstrap API hiện có thêm `GET /api/practice/questions` để learner nhận question metadata đã publish; answer key không nằm trong public response.
+
 ```text
 POST /api/practice/sessions
 GET  /api/practice/sessions/{id}

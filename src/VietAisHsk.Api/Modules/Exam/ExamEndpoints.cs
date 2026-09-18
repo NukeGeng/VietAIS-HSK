@@ -8,7 +8,7 @@ public static class ExamEndpoints
     {
         var catalog = endpoints.MapGroup("/api");
 
-        catalog.MapGet("/exams", (IExamCatalog exams) => Results.Ok(exams.GetPublishedExams()));
+        catalog.MapGet("/exams", (IExamCatalog exams) => Results.Ok(exams.GetPublishedExams().Select(ToDefinitionView)));
 
         catalog.MapPost("/exams/{examId}/attempts", (string examId, IUserContextAccessor contextAccessor, IExamCatalog exams, IExamStore store) =>
         {
@@ -21,7 +21,7 @@ public static class ExamEndpoints
             var exam = exams.GetPublishedExam(examId);
             return exam is null
                 ? Results.NotFound()
-                : Results.Created($"/api/exam-attempts/{{id}}", store.Start(context.UserId, exam));
+                : Results.Created($"/api/exam-attempts/{{id}}", ToAttemptView(store.Start(context.UserId, exam)));
         });
 
         catalog.MapGet("/exam-attempts/{id}", (string id, IUserContextAccessor contextAccessor, IExamStore store) =>
@@ -33,7 +33,7 @@ public static class ExamEndpoints
             }
 
             var attempt = store.Get(context.UserId, id);
-            return attempt is null ? Results.NotFound() : Results.Ok(attempt);
+            return attempt is null ? Results.NotFound() : Results.Ok(ToAttemptView(attempt));
         });
 
         catalog.MapPost("/exam-attempts/{id}/answers", (string id, ExamAnswerRequest request, IUserContextAccessor contextAccessor, IExamStore store) =>
@@ -56,7 +56,7 @@ public static class ExamEndpoints
             }
 
             var updated = store.SubmitAnswer(context.UserId, id, request);
-            return updated is null ? Results.NotFound() : Results.Ok(updated);
+            return updated is null ? Results.NotFound() : Results.Ok(ToAttemptView(updated));
         });
 
         catalog.MapPost("/exam-attempts/{id}/submit", (string id, IUserContextAccessor contextAccessor, IExamStore store) =>
@@ -68,7 +68,7 @@ public static class ExamEndpoints
             }
 
             var submitted = store.Submit(context.UserId, id);
-            return submitted is null ? Results.NotFound() : Results.Ok(submitted);
+            return submitted is null ? Results.NotFound() : Results.Ok(ToAttemptView(submitted));
         });
 
         catalog.MapGet("/exam-attempts/{id}/result", (string id, IUserContextAccessor contextAccessor, IExamStore store) =>
@@ -85,4 +85,12 @@ public static class ExamEndpoints
 
         return endpoints;
     }
+
+    private static ExamDefinitionView ToDefinitionView(ExamDefinition exam) =>
+        new(exam.Id, exam.Name, exam.HskLevel, exam.ContentVersion, exam.Questions.Select(ToQuestionView).ToArray());
+
+    private static ExamAttemptView ToAttemptView(ExamAttempt attempt) =>
+        new(attempt.Id, attempt.ExamId, attempt.ContentVersion, attempt.Status, attempt.Questions.Select(ToQuestionView).ToArray(), attempt.Answers, attempt.ObjectiveScore);
+
+    private static ExamQuestionView ToQuestionView(ExamQuestion question) => new(question.Id, question.Prompt);
 }

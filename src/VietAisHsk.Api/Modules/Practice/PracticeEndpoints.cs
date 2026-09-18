@@ -11,6 +11,16 @@ public static class PracticeEndpoints
     {
         var group = endpoints.MapGroup("/api/practice");
 
+        group.MapGet("/questions", (IUserContextAccessor contextAccessor, IPracticeQuestionReader reader) =>
+        {
+            if (contextAccessor.Current is null)
+            {
+                return Results.Unauthorized();
+            }
+
+            return Results.Ok(reader.GetPublishedQuestions().Select(ToQuestionView));
+        });
+
         group.MapPost("/sessions", (StartPracticeSessionRequest request, IUserContextAccessor contextAccessor, IPracticeQuestionReader reader, IPracticeStore store) =>
         {
             var context = contextAccessor.Current;
@@ -31,7 +41,7 @@ public static class PracticeEndpoints
             }
 
             var session = store.Create(context.UserId, questions)!;
-            return Results.Created($"/api/practice/sessions/{session.Id}", session);
+            return Results.Created($"/api/practice/sessions/{session.Id}", ToSessionView(session));
         });
 
         group.MapGet("/sessions/{id}", (string id, IUserContextAccessor contextAccessor, IPracticeStore store) =>
@@ -43,7 +53,7 @@ public static class PracticeEndpoints
             }
 
             var session = store.Get(context.UserId, id);
-            return session is null ? Results.NotFound() : Results.Ok(session);
+            return session is null ? Results.NotFound() : Results.Ok(ToSessionView(session));
         });
 
         group.MapPost("/sessions/{id}/answers", (string id, SubmitPracticeAnswerRequest request, IUserContextAccessor contextAccessor, IPracticeStore store, IReviewSignalSink reviewSignals, IProgressSignalSink progressSignals) =>
@@ -112,4 +122,10 @@ public static class PracticeEndpoints
 
         return endpoints;
     }
+
+    private static PracticeQuestionView ToQuestionView(PracticeQuestion question) =>
+        new(question.Id, question.Type, question.Prompt, question.Status);
+
+    private static PracticeSessionView ToSessionView(PracticeSession session) =>
+        new(session.Id, session.Status, session.Questions.Select(ToQuestionView).ToArray(), session.Attempts, session.CreatedAt, session.UpdatedAt);
 }

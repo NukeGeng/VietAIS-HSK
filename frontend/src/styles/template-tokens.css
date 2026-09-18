@@ -1,0 +1,35 @@
+:root {
+  --page-bg: #f5f7ff;
+  --surface: #ffffff;
+  --surface-soft: #e0f2fe;
+
+  --text-primary: #020617;
+  --text-secondary: #475569;
+
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+
+  --border: rgba(219, 234, 254, 0.9);
+
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 16px 52px rgba(37, 99, 235, 0.11);
+
+  --container: 1630px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  --transition-fast: 180ms ease;
+  --transition-base: 320ms ease;
+}

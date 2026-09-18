@@ -4,8 +4,8 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     mobileDrawerOpen: false,
     expandedMenus: {
-      'Kỹ năng': true,
-      'Luyện tập': true,
+      'Kỹ năng': false,
+      'Luyện tập': false,
       'Chữ Hán': false,
     } as Record<string, boolean>,
   }),

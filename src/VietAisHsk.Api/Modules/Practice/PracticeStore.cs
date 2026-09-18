@@ -4,6 +4,7 @@ namespace VietAisHsk.Api.Modules.Practice;
 
 public interface IPracticeQuestionReader
 {
+    IReadOnlyList<PracticeQuestion> GetPublishedQuestions();
     IReadOnlyList<PracticeQuestion> GetPublishedQuestions(IReadOnlyList<string> questionIds);
 }
 
@@ -23,6 +24,8 @@ public sealed class BootstrapPracticeQuestionReader : IPracticeQuestionReader
             .Where(Questions.ContainsKey)
             .Select(id => Questions[id])
             .ToArray();
+
+    public IReadOnlyList<PracticeQuestion> GetPublishedQuestions() => Questions.Values.ToArray();
 }
 
 public interface IPracticeStore

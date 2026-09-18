@@ -8,14 +8,14 @@ const ui = useUiStore()
 </script>
 
 <template>
-  <div class="app-shell">
-    <div v-if="ui.mobileDrawerOpen" class="mobile-backdrop" @click="ui.closeMobileDrawer" />
+  <div class="app-page app-shell">
+    <div v-if="ui.mobileDrawerOpen" class="app-scrim is-visible" @click="ui.closeMobileDrawer" />
     <AppSidebar />
-    <div class="app-stage">
+    <main class="app-main">
       <AppHeader />
-      <main class="page-container">
+      <div class="app-content">
         <RouterView />
-      </main>
-    </div>
+      </div>
+    </main>
   </div>
 </template>

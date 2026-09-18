@@ -14,6 +14,7 @@
 
 - `dotnet build src/VietAisHsk.Api/VietAisHsk.Api.csproj --no-restore` — pass.
 - `node scripts/identity-smoke.mjs` — pass, gồm auth, grading đúng/sai, isolation và complete idempotency.
+- `dotnet test VietAisHsk.slnx --no-restore -m:1` — pass, gồm normalization và accepted-answer grading.
 
 ### Computer Use
 
@@ -23,3 +24,9 @@
 
 - Practice grading không gọi AI và không dùng RabbitMQ.
 - API trả lỗi rõ ràng cho session không tồn tại, answer thiếu và session đã hoàn thành.
+
+## PRACTICE-FIX-002 — Public practice views không lộ answer key
+
+- Tách `PracticeQuestionView` và `PracticeSessionView` khỏi domain model.
+- Thêm endpoint question catalog chỉ trả prompt/type/status.
+- Smoke test assert response không có `acceptedAnswers`.

@@ -23,3 +23,9 @@
 - Không tự gọi AI khi learner chỉ submit attempt.
 - Không khóa provider/model trong implementation.
 - Feedback schema sẵn sàng để nối AI Gateway sau khi decision được chốt.
+
+## TRANSLATION-FIX-002 — Public translation views không lộ reference Chinese
+
+- Tách exercise/attempt view khỏi domain model.
+- Learner response không còn trả `ReferenceChinese`; gateway vẫn nhận domain attempt nội bộ.
+- Smoke test assert catalog và attempt không có reference answer.
