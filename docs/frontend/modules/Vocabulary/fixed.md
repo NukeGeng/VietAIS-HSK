@@ -48,3 +48,19 @@
 
 - Viewport `390×844`, route `/app/vocabulary/vocab-anpai`.
 - Xác nhận `安排` nằm trên một dòng trong glyph box, nút `Nghe phát âm` không còn bị che và phần Ví dụ/Chữ cấu tạo vẫn truy cập được.
+
+## VOCABULARY-FE-FIX-004 — Lọc theo catalog và trạng thái detail
+
+### Thay đổi
+
+- Selector HSK lấy danh sách cấp độ duy nhất từ catalog đang hiển thị, sắp theo số; không ghi cứng HSK 1/3.
+- Detail id không có trong catalog hiển thị thông báo ngắn và link về danh sách thay vì render nhầm list.
+- Lỗi Speech API có thông báo riêng tại list/detail; chỉ lỗi tải API mới thay nội dung bằng error card.
+
+### Verification — 2026-09-24
+
+- Computer Use 1440×900: list có bốn record, không tràn ngang; heading và filter ở ngay đầu nội dung.
+- Computer Use 390×844: list và detail `安排` hiển thị đủ glyph, Pinyin, nghĩa, ví dụ và nút nghe; không tràn ngang.
+- Computer Use 390×844: `/app/vocabulary/not-found-qa` hiện “Không tìm thấy từ vựng này.” và link quay lại, không còn bốn card list.
+- Computer Use 390×844: chọn `HSK 3` còn `安排`, `经验`; selector hiện các cấp từ dữ liệu fixture (`HSK 1`, `HSK 3`). Chưa có dữ liệu HSK 2 trong catalog hiện tại để kiểm chứng bằng UI.
+- Vue type-check và Vite build pass. Nhánh trình duyệt thiếu Speech API được sửa theo code path; runtime QA trên browser không hỗ trợ API này vẫn cần thực hiện trước khi đóng hẳn bug 006.
