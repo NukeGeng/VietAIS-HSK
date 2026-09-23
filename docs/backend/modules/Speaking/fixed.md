@@ -52,3 +52,20 @@
 - `scripts/identity-smoke.mjs` kiểm tra learner khác không đọc/ghi được session; provider fallback vẫn lưu turn và end idempotent.
 - `dotnet test tests/VietAisHsk.Api.Tests --no-restore -m:1` — pass.
 - STT transport và TTS provider vẫn để pending vì contract realtime/audio chưa được chốt trong docs.
+
+## SPEAKING-FIX-004 — Persist speaking sessions with Marten
+
+### Thay đổi
+
+- Thêm `MartenSpeakingStore` cho start/get/turn/end/history.
+- Đăng ký `SpeakingSession` trong Marten schema khi Postgres được cấu hình; local không có Postgres
+  vẫn dùng in-memory adapter.
+- Session ownership được kiểm tra ở mọi thao tác, turn và trạng thái Ended được giữ nguyên sau restart.
+
+### Kiểm chứng
+
+- `dotnet build VietAisHsk.slnx --no-restore` — pass.
+- `dotnet test VietAisHsk.slnx --no-restore -m:1` — 103/103 pass.
+- `scripts/marten-persistence-smoke.mjs`: write → restart API → read → restart API → verify pass;
+  session/turn, `speaking-session-completed` activity và progress counters còn nguyên sau restart,
+  user khác nhận `404`.

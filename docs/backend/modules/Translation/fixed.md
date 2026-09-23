@@ -59,3 +59,19 @@
 - `dotnet test tests/VietAisHsk.Api.Tests --no-restore -m:1` — validation contract pass.
 - `scripts/identity-smoke.mjs` kiểm tra learner khác không thể request feedback trên attempt của user hiện tại; provider chưa cấu hình trả `503` và history vẫn giữ attempt.
 - Computer Use QA 2026-09-22: mở `/app/skills/translation`, nhập `我喜欢学习中文。`, lưu attempt thành công, nút `Nhận góp ý` xuất hiện; provider chưa cấu hình hiển thị lỗi an toàn nhưng attempt vẫn còn trong `Lịch sử gần đây`. Screenshot browser không có clipping — pass.
+
+## TRANSLATION-FIX-005 — Persist translation attempts with Marten
+
+### Thay đổi
+
+- Thêm `MartenTranslationStore` cho create/get/history/set-feedback.
+- Đăng ký `TranslationAttempt` trong Marten schema khi Postgres được cấu hình; local không có Postgres
+  vẫn dùng in-memory adapter.
+- Lookup và history luôn giới hạn theo `UserId`, giữ nguyên contract không lộ đáp án tham khảo.
+
+### Kiểm chứng
+
+- `dotnet build VietAisHsk.slnx --no-restore` — pass.
+- `dotnet test VietAisHsk.slnx --no-restore -m:1` — 103/103 pass.
+- `scripts/marten-persistence-smoke.mjs`: write → restart API → read → restart API → verify pass;
+  attempt/history và `translation-attempt` activity còn nguyên sau restart, user khác không đọc được history.

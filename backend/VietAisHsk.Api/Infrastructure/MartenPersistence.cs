@@ -8,6 +8,8 @@ using VietAisHsk.Api.Modules.Learning;
 using VietAisHsk.Api.Modules.Practice;
 using VietAisHsk.Api.Modules.Progress;
 using VietAisHsk.Api.Modules.Review;
+using VietAisHsk.Api.Modules.Speaking;
+using VietAisHsk.Api.Modules.Translation;
 
 namespace VietAisHsk.Api.Infrastructure;
 
@@ -163,6 +165,8 @@ public static class MartenPersistenceExtensions
             options.Schema.For<ReviewItem>().Identity(x => x.Id);
             options.Schema.For<ReviewSession>().Identity(x => x.Id);
             options.Schema.For<ExamAttemptMetadata>().Identity(x => x.Id);
+            options.Schema.For<TranslationAttempt>().Identity(x => x.Id);
+            options.Schema.For<SpeakingSession>().Identity(x => x.Id);
         });
 
         if (integrateWithWolverine)
@@ -180,6 +184,8 @@ public static class MartenPersistenceExtensions
         services.AddScoped<IReviewStore, MartenReviewStore>();
         services.AddScoped<IReviewSignalSink>(provider => provider.GetRequiredService<IReviewStore>());
         services.AddScoped<IExamStore, MartenExamStore>();
+        services.AddScoped<ITranslationStore, MartenTranslationStore>();
+        services.AddScoped<ISpeakingStore, MartenSpeakingStore>();
         return services;
     }
 }

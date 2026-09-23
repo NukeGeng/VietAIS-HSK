@@ -1,12 +1,13 @@
 const baseUrl = process.env.IDENTITY_API_URL ?? "http://127.0.0.1:5056";
 const mode = process.env.PERSISTENCE_MODE ?? "write";
+const persistenceSmokeUserId = process.env.MARTEN_PERSISTENCE_SMOKE_USER_ID ?? "marten-persistence-user";
 const headers = {
   "Content-Type": "application/json",
-  "X-Dev-User-Id": process.env.MARTEN_PERSISTENCE_SMOKE_USER_ID ?? "marten-persistence-user"
+  "X-Dev-User-Id": persistenceSmokeUserId
 };
 const learningHeaders = {
   ...headers,
-  "X-Dev-User-Id": process.env.MARTEN_LEARNING_SMOKE_USER_ID ?? headers["X-Dev-User-Id"]
+  "X-Dev-User-Id": process.env.MARTEN_LEARNING_SMOKE_USER_ID ?? `${persistenceSmokeUserId}-learning`
 };
 const curriculumAdminHeaders = { ...headers, "X-Dev-Permission": "curriculum.manage" };
 const reviewKnowledgeId = "bootstrap-tone-ma";
@@ -225,7 +226,43 @@ if (mode === "write") {
     || !weakPoints.body?.some(item => item.knowledgeId === reviewKnowledgeId && item.evidenceCount === 1)) {
     throw new Error(`incorrect practice signal should create one progress weak point, got ${weakPoints.response.status}`);
   }
-  console.log(`Marten persistence write passed; PRACTICE_SMOKE_SESSION_ID=${practiceSessionId}; REVIEW_SMOKE_SESSION_ID=${reviewSession.body.id}`);
+
+  const translationAttempt = await request("/api/translation/exercises/bootstrap-translation-1/attempts", {
+    method: "POST",
+    body: JSON.stringify({ answerChinese: "我喜欢学习中文。" })
+  });
+  if (translationAttempt.response.status !== 201 || !translationAttempt.body?.id) {
+    throw new Error(`translation persistence write expected 201, got ${translationAttempt.response.status}`);
+  }
+
+  const speakingStart = await request("/api/speaking/sessions", {
+    method: "POST",
+    body: JSON.stringify({ hskContext: "HSK 3", mode: "guided-dialogue" })
+  });
+  if (speakingStart.response.status !== 201 || !speakingStart.body?.id) {
+    throw new Error(`speaking persistence write expected 201, got ${speakingStart.response.status}`);
+  }
+  const speakingSessionId = speakingStart.body.id;
+  const speakingTurn = await request(`/api/speaking/sessions/${speakingSessionId}/turns`, {
+    method: "POST",
+    body: JSON.stringify({ transcript: "你好", audioReference: null })
+  });
+  if (speakingTurn.response.status !== 200 || speakingTurn.body?.turn?.providerStatus !== "unavailable") {
+    throw new Error(`speaking persistence turn expected unavailable provider state, got ${speakingTurn.response.status}`);
+  }
+  const speakingEnd = await request(`/api/speaking/sessions/${speakingSessionId}/end`, { method: "POST" });
+  if (speakingEnd.response.status !== 200 || speakingEnd.body?.status !== "Ended") {
+    throw new Error(`speaking persistence end expected 200/Ended, got ${speakingEnd.response.status}`);
+  }
+
+  const conversationProgress = await request("/api/progress");
+  if (conversationProgress.response.status !== 200
+    || conversationProgress.body?.translationAttempts !== 1
+    || conversationProgress.body?.speakingSessions !== 1
+    || conversationProgress.body?.speakingTurns !== 1) {
+    throw new Error(`translation/speaking progress persistence expected one attempt/session/turn, got ${conversationProgress.response.status}`);
+  }
+  console.log(`Marten persistence write passed; PRACTICE_SMOKE_SESSION_ID=${practiceSessionId}; REVIEW_SMOKE_SESSION_ID=${reviewSession.body.id}; TRANSLATION_SMOKE_ATTEMPT_ID=${translationAttempt.body.id}; SPEAKING_SMOKE_SESSION_ID=${speakingSessionId}`);
 } else if (mode === "read") {
   const read = await request("/api/me");
   if (read.response.status !== 200 || read.body?.profile?.displayName !== "Marten persisted" || read.body?.profile?.studyPreferences?.dailyMinutes !== 45) {
@@ -265,6 +302,46 @@ if (mode === "write") {
   });
   if (privateProgress.response.status !== 200 || privateProgress.body?.practiceAnswered !== 0) {
     throw new Error(`cross-user progress isolation failed: ${privateProgress.response.status}`);
+  }
+
+  const conversationProgress = await request("/api/progress");
+  if (conversationProgress.response.status !== 200
+    || conversationProgress.body?.translationAttempts !== 1
+    || conversationProgress.body?.speakingSessions !== 1
+    || conversationProgress.body?.speakingTurns !== 1) {
+    throw new Error(`Marten translation/speaking progress replay failed: ${conversationProgress.response.status}`);
+  }
+  const translationAttemptId = process.env.TRANSLATION_SMOKE_ATTEMPT_ID;
+  if (!translationAttemptId) {
+    throw new Error("TRANSLATION_SMOKE_ATTEMPT_ID is required for the persistence read phase");
+  }
+  const translationHistory = await request("/api/translation/history");
+  if (translationHistory.response.status !== 200
+    || translationHistory.body?.length !== 1
+    || translationHistory.body[0]?.id !== translationAttemptId) {
+    throw new Error(`Marten translation history replay failed: ${translationHistory.response.status}`);
+  }
+  const privateTranslationHistory = await request("/api/translation/history", {
+    headers: { "X-Dev-User-Id": "marten-other-translation-user" }
+  });
+  if (privateTranslationHistory.response.status !== 200 || privateTranslationHistory.body?.length !== 0) {
+    throw new Error(`cross-user translation history isolation failed: ${privateTranslationHistory.response.status}`);
+  }
+  const speakingSessionId = process.env.SPEAKING_SMOKE_SESSION_ID;
+  if (!speakingSessionId) {
+    throw new Error("SPEAKING_SMOKE_SESSION_ID is required for the persistence read phase");
+  }
+  const speakingSession = await request(`/api/speaking/sessions/${speakingSessionId}`);
+  if (speakingSession.response.status !== 200
+    || speakingSession.body?.status !== "Ended"
+    || speakingSession.body?.turns?.length !== 1) {
+    throw new Error(`Marten speaking session replay failed: ${speakingSession.response.status}`);
+  }
+  const privateSpeakingSession = await request(`/api/speaking/sessions/${speakingSessionId}`, {
+    headers: { "X-Dev-User-Id": "marten-other-speaking-user" }
+  });
+  if (privateSpeakingSession.response.status !== 404) {
+    throw new Error(`cross-user speaking session isolation failed: ${privateSpeakingSession.response.status}`);
   }
 
   const complete = await request("/api/learning/lessons/marten-lesson-published-smoke/complete", {
@@ -351,6 +428,8 @@ if (mode === "write") {
   if (persistedProgressHistory.response.status !== 200
     || !persistedActivityTypes.includes("practice-completed")
     || !persistedActivityTypes.includes("review-completed")
+    || !persistedActivityTypes.includes("translation-attempt")
+    || !persistedActivityTypes.includes("speaking-session-completed")
     || persistedActivityTypes.includes("lesson-completed")) {
     throw new Error(`Persistence learner history ownership check failed, got ${persistedProgressHistory.response.status}`);
   }
@@ -390,14 +469,19 @@ if (mode === "write") {
     || progress.body?.practiceAnswered !== 2
     || progress.body?.practiceCorrect !== 1
     || progress.body?.practiceIncorrect !== 1
+    || progress.body?.translationAttempts !== 1
+    || progress.body?.speakingSessions !== 1
+    || progress.body?.speakingTurns !== 1
     || progress.body?.completedActivities < 2) {
     throw new Error(`Marten progress projection replay failed: ${progress.response.status}`);
   }
   const persistedProgressHistory = await request("/api/progress/history");
   if (persistedProgressHistory.response.status !== 200
-    || persistedProgressHistory.body?.length < 2
+    || persistedProgressHistory.body?.length < 4
     || !persistedProgressHistory.body.some(item => item.activityType === "practice-completed")
-    || !persistedProgressHistory.body.some(item => item.activityType === "review-completed")) {
+    || !persistedProgressHistory.body.some(item => item.activityType === "review-completed")
+    || !persistedProgressHistory.body.some(item => item.activityType === "translation-attempt")
+    || !persistedProgressHistory.body.some(item => item.activityType === "speaking-session-completed")) {
     throw new Error(`Marten persistence progress history replay failed: ${persistedProgressHistory.response.status}`);
   }
   const learningProgressHistory = await request("/api/progress/history", { headers: learningHeaders });
