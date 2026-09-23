@@ -99,7 +99,7 @@ builder.Services.AddSingleton<IExamCatalog, BootstrapExamCatalog>();
 builder.Services.AddSingleton<IExamStore>(services =>
     new InMemoryExamStore(services.GetRequiredService<IExamSubjectiveGradingQueue>()));
 builder.Services.AddSingleton<ILearningStore, InMemoryLearningStore>();
-builder.Services.AddSingleton<IPracticeQuestionReader, ContentPracticeQuestionReader>();
+builder.Services.AddScoped<IPracticeQuestionReader, ContentPracticeQuestionReader>();
 builder.Services.AddSingleton<IPracticeStore, InMemoryPracticeStore>();
 builder.Services.AddSingleton<IHanziWritingStore>(services => new InMemoryHanziWritingStore(services.GetRequiredService<IHanziCatalog>()));
 builder.Services.AddSingleton<IProgressStore, InMemoryProgressStore>();

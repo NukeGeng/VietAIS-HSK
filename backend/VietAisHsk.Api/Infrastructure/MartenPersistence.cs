@@ -2,6 +2,7 @@ using Marten;
 using JasperFx.Events;
 using Wolverine.Marten;
 using VietAisHsk.Api.Modules.Curriculum;
+using VietAisHsk.Api.Modules.Content;
 using VietAisHsk.Api.Modules.Exam;
 using VietAisHsk.Api.Modules.Identity;
 using VietAisHsk.Api.Modules.Learning;
@@ -167,6 +168,12 @@ public static class MartenPersistenceExtensions
             options.Schema.For<ExamAttemptMetadata>().Identity(x => x.Id);
             options.Schema.For<TranslationAttempt>().Identity(x => x.Id);
             options.Schema.For<SpeakingSession>().Identity(x => x.Id);
+            options.Schema.For<ContentQuestion>().Identity(x => x.Id);
+            options.Schema.For<StoryContent>().Identity(x => x.Id);
+            options.Schema.For<VideoContent>().Identity(x => x.Id);
+            options.Schema.For<LearningResource>().Identity(x => x.Id);
+            options.Schema.For<ToolDefinition>().Identity(x => x.Id);
+            options.Schema.For<AudioAsset>().Identity(x => x.Id);
         });
 
         if (integrateWithWolverine)
@@ -186,6 +193,10 @@ public static class MartenPersistenceExtensions
         services.AddScoped<IExamStore, MartenExamStore>();
         services.AddScoped<ITranslationStore, MartenTranslationStore>();
         services.AddScoped<ISpeakingStore, MartenSpeakingStore>();
+        services.AddScoped<IQuestionBank, MartenQuestionBank>();
+        services.AddScoped<IQuestionBankAdmin, MartenQuestionBank>();
+        services.AddScoped<IExtendedContentStore, MartenExtendedContentStore>();
+        services.AddScoped<IAudioAssetStore, MartenAudioAssetStore>();
         return services;
     }
 }

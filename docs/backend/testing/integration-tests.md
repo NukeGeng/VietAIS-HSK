@@ -21,9 +21,13 @@ PERSISTENCE_MODE=verify
 → replay completion/projection sau khi read phase đã cập nhật state
 ```
 
-Verification 2026-09-23 trên stack dữ liệu sạch: cả ba pha đều pass, bao gồm Translation attempt,
-Speaking session/turn và progress activity sau hai lần restart API. Đây là kiểm chứng
-Marten/PostgreSQL thật, không phải chỉ là test store in-memory.
+Smoke cũng kiểm tra Content khi chạy Marten: Story publish, question-bank publish và
+AudioAsset idempotency/state được đọc lại sau khi API restart; không chỉ kiểm tra learner
+progress.
+
+Verification 2026-09-23 trên stack dữ liệu sạch: cả ba pha đều pass, bao gồm Content Story/question/
+AudioAsset, Translation attempt, Speaking session/turn và progress activity sau hai lần restart API.
+Đây là kiểm chứng Marten/PostgreSQL thật, không phải chỉ là test store in-memory.
 
 Regression Curriculum 2026-09-23: cùng smoke flow xác nhận import một syllabus version mới với
 level Id đã thuộc version cũ trả `409 Conflict`; sau restart, level published vẫn giữ version cũ.

@@ -10,6 +10,7 @@ const learningHeaders = {
   "X-Dev-User-Id": process.env.MARTEN_LEARNING_SMOKE_USER_ID ?? `${persistenceSmokeUserId}-learning`
 };
 const curriculumAdminHeaders = { ...headers, "X-Dev-Permission": "curriculum.manage" };
+const contentAdminHeaders = { ...headers, "X-Dev-Permission": "content.manage" };
 const reviewKnowledgeId = "bootstrap-tone-ma";
 const curriculumImportPayload = {
   syllabusVersionId: "marten-hsk-3.0-tree-smoke",
@@ -132,6 +133,54 @@ if (mode === "write") {
   });
   if (conflictingVersionResponse.response.status !== 409) {
     throw new Error(`cross-version level id reuse expected 409, got ${conflictingVersionResponse.response.status}`);
+  }
+
+  const publishedStoriesBeforeContentPublish = await request("/api/content/stories");
+  if (publishedStoriesBeforeContentPublish.response.status !== 200
+    || !publishedStoriesBeforeContentPublish.body?.some(item => item.id === "story-classroom")
+    || publishedStoriesBeforeContentPublish.body?.some(item => item.id === "story-weekend-draft")) {
+    throw new Error(`published extended content seed visibility failed: ${publishedStoriesBeforeContentPublish.response.status}`);
+  }
+  const adminStories = await request("/api/admin/content/stories", { headers: contentAdminHeaders });
+  if (adminStories.response.status !== 200
+    || !adminStories.body?.some(item => item.id === "story-weekend-draft" && item.status === "Draft")) {
+    throw new Error(`admin extended content read failed: ${adminStories.response.status}`);
+  }
+  const publishStory = await request("/api/admin/content/stories/story-weekend-draft/publish", {
+    method: "POST",
+    headers: contentAdminHeaders
+  });
+  if (publishStory.response.status !== 200 || publishStory.body?.status !== "Published") {
+    throw new Error(`story publish persistence expected 200, got ${publishStory.response.status}`);
+  }
+
+  const adminQuestions = await request("/api/admin/content/questions?type=listening", { headers: contentAdminHeaders });
+  if (adminQuestions.response.status !== 200
+    || !adminQuestions.body?.some(item => item.id === "bootstrap-listening-draft" && item.status === "Draft")) {
+    throw new Error(`admin question-bank read failed: ${adminQuestions.response.status}`);
+  }
+  const publishQuestion = await request("/api/admin/content/questions/bootstrap-listening-draft/publish", {
+    method: "POST",
+    headers: contentAdminHeaders
+  });
+  if (publishQuestion.response.status !== 200 || publishQuestion.body?.status !== "Published") {
+    throw new Error(`question publish persistence expected 200, got ${publishQuestion.response.status}`);
+  }
+
+  const contentAudio = await request("/api/admin/content/audio", {
+    method: "POST",
+    headers: contentAdminHeaders,
+    body: JSON.stringify({
+      contentId: "marten-content-audio",
+      text: "今天继续学习汉语。",
+      voice: "cosyvoice-v1",
+      idempotencyKey: "marten-content-audio:attempt:1"
+    })
+  });
+  if (![200, 201].includes(contentAudio.response.status)
+    || contentAudio.body?.idempotencyKey !== "marten-content-audio:attempt:1"
+    || contentAudio.body?.status !== "Pending") {
+    throw new Error(`audio asset persistence write expected 200/201 Pending, got ${contentAudio.response.status}`);
   }
 
   const draftLessonStart = await request("/api/learning/lessons/marten-lesson-draft-smoke/start", {
@@ -271,6 +320,22 @@ if (mode === "write") {
   const curriculum = await request("/api/curriculum/hsk-levels");
   if (curriculum.response.status !== 200 || !curriculum.body?.some(level => level.id === "marten-hsk3-tree-smoke")) {
     throw new Error(`Marten curriculum read failed: ${curriculum.response.status}`);
+  }
+
+  const persistedStories = await request("/api/content/stories");
+  if (persistedStories.response.status !== 200
+    || !persistedStories.body?.some(item => item.id === "story-weekend-draft" && item.status === "Published")) {
+    throw new Error(`Marten extended content publish replay failed: ${persistedStories.response.status}`);
+  }
+  const persistedQuestions = await request("/api/content/questions?type=listening");
+  if (persistedQuestions.response.status !== 200
+    || !persistedQuestions.body?.some(item => item.id === "bootstrap-listening-draft" && item.status === "Published")) {
+    throw new Error(`Marten question publish replay failed: ${persistedQuestions.response.status}`);
+  }
+  const persistedAudio = await request("/api/admin/content/audio", { headers: contentAdminHeaders });
+  if (persistedAudio.response.status !== 200
+    || !persistedAudio.body?.some(item => item.idempotencyKey === "marten-content-audio:attempt:1" && item.status === "Pending")) {
+    throw new Error(`Marten audio asset replay failed: ${persistedAudio.response.status}`);
   }
 
   const tree = await request("/api/curriculum/hsk/marten-hsk3-tree-smoke/tree");
@@ -447,6 +512,17 @@ if (mode === "write") {
   if (learning.response.status !== 200
     || !learning.body?.state?.completedLessonIds?.includes("marten-lesson-published-smoke")) {
     throw new Error(`Marten lesson completion replay failed: ${learning.response.status}`);
+  }
+  const contentStories = await request("/api/content/stories");
+  const contentQuestions = await request("/api/content/questions?type=listening");
+  const contentAudio = await request("/api/admin/content/audio", { headers: contentAdminHeaders });
+  if (contentStories.response.status !== 200
+    || !contentStories.body?.some(item => item.id === "story-weekend-draft" && item.status === "Published")
+    || contentQuestions.response.status !== 200
+    || !contentQuestions.body?.some(item => item.id === "bootstrap-listening-draft" && item.status === "Published")
+    || contentAudio.response.status !== 200
+    || !contentAudio.body?.some(item => item.idempotencyKey === "marten-content-audio:attempt:1")) {
+    throw new Error("Marten Content restart/visibility replay failed");
   }
   const practiceSessionId = process.env.PRACTICE_SMOKE_SESSION_ID;
   if (!practiceSessionId) {

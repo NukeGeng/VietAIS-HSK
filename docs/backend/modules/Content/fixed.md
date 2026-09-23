@@ -78,3 +78,18 @@
   provision, identity và learning completion smoke pass.
 - CosyVoice worker và object storage thật vẫn chưa được giả lập là đã hoàn thành; đây là phần
   production follow-up được ghi ở `docs/deploy/03-rabbitmq.md` và `docs/deploy/11-storage-cdn.md`.
+
+## CONTENT-BE-FIX-006 — Persist Content state qua API restart
+
+- Khi PostgreSQL/Marten được cấu hình, Content không còn reset sau API
+  restart: question bank, Story/Video/Resource/Tool và AudioAsset được seed một lần rồi đọc/ghi
+  qua document stores (`MartenQuestionBank`, `MartenExtendedContentStore`,
+  `MartenAudioAssetStore`). Không có Postgres vẫn giữ fallback in-memory cho local development.
+  Dataset HSK chính thức, CMS authoring đầy đủ, CosyVoice worker và object storage thật vẫn chưa
+  được tuyên bố hoàn thành.
+
+### Verification
+
+- Compose persistence smoke 2026-09-23 trên stack dữ liệu sạch: write → restart/read →
+  restart/verify đều pass; Story draft publish, question draft publish và AudioAsset Pending
+  idempotency state được giữ qua hai lần API restart.

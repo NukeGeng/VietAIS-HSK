@@ -50,9 +50,18 @@ reading và writing; mỗi record giữ status/source/version/license và `Conte
 qua `GET /api/content/questions` hoặc Practice, còn admin có thể xem draft, lưu draft và publish
 qua `content.manage`. Đây vẫn là fixture để nối flow, chưa phải question bank HSK 3.0 chính thức.
 
+Khi có `ConnectionStrings:Postgres`, `MartenQuestionBank` seed catalog này một lần vào Marten và
+giữ draft/publish/version qua API restart. Khi không có PostgreSQL, `BootstrapQuestionBank` vẫn là
+fallback local cho smoke test.
+
 Extended content bootstrap đã có read/publish contract riêng: learner chỉ nhận record `Published`,
 có filter HSK/topic cho Story/Video/Resource; admin có thể xem draft và publish bằng permission
 `content.manage`. Đây là fixture có provenance, chưa phải CMS authoring đầy đủ.
+
+Với PostgreSQL, `MartenExtendedContentStore` persist Story/Video/Resource/Tool documents và
+`MartenAudioAssetStore` persist trạng thái audio/idempotency key. Các fixture vẫn chỉ là dữ liệu
+tham chiếu platform-authored; việc import dataset chính thức, CosyVoice worker và object storage
+production vẫn là bước riêng.
 
 ## 5. Audio
 
