@@ -33,7 +33,8 @@ Hệ thống phải:
 - backend theo Modular Monolith;
 - dùng Marten + Wolverine + RabbitMQ có chọn lọc;
 - production frontend dùng Vue 3;
-- `design-template/` HTML/CSS phải được duyệt trước khi production frontend triển khai.
+- `design-template/` HTML/CSS là mẫu tham chiếu panda để duyệt visual trước khi production frontend triển khai;
+  đây không phải production frontend và không được dùng như một runtime UI thứ hai.
 
 ---
 
@@ -337,9 +338,9 @@ Không xóa bug khỏi `bugs.md`.
 
 ## 9. Frontend
 
-Production frontend chỉ bắt đầu sau khi màn tương ứng được duyệt trong `design-template/`.
-
-Vue phải tái hiện approved template, không redesign.
+`frontend/` là frontend production duy nhất. Production frontend chỉ bắt đầu sau khi màn tương ứng
+được duyệt trong `design-template/`; Vue tái hiện approved template và không tạo thêm một bản runtime
+trong `design-template/`.
 
 Frontend module cũng có:
 

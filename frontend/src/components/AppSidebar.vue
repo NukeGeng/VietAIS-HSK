@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { navigation } from '../navigation'
+import { getJson, postJson } from '../services/api'
 import { useUiStore } from '../stores/ui'
-import type { NavItem } from '../types'
+import type { HskLevel, LearningHome, LearningState, NavItem } from '../types'
 
 const route = useRoute()
 const ui = useUiStore()
+const hskLevels = ref<HskLevel[]>([])
+const selectedHskLevelId = ref('')
+const hskChanging = ref(false)
 
 const isActive = (item: NavItem) => {
   if (!item.to) return false
@@ -15,7 +19,10 @@ const isActive = (item: NavItem) => {
 }
 
 const hasActiveChild = (item: NavItem) => item.children?.some(isActive) ?? false
-const isExpanded = (item: NavItem) => ui.expandedMenus[item.label] ?? hasActiveChild(item)
+// The active route is the source of truth for visibility. A stale `false` in
+// the UI store must not hide the parent branch while one of its children is
+// selected; that was the cause of sidebar items disappearing after navigation.
+const isExpanded = (item: NavItem) => Boolean(ui.expandedMenus[item.label] || hasActiveChild(item))
 const closeOnNavigate = () => ui.closeMobileDrawer()
 
 const currentSection = computed(() => {
@@ -37,6 +44,33 @@ const icons: Record<string, string> = {
 }
 
 const iconFor = (label: string) => icons[label] ?? '•'
+const selectedHskLevel = computed(() => hskLevels.value.find(level => level.id === selectedHskLevelId.value) ?? hskLevels.value[0] ?? null)
+const selectedHskLabel = computed(() => selectedHskLevel.value?.displayName ?? 'HSK 3')
+
+onMounted(async () => {
+  try {
+    const [levels, learning] = await Promise.all([
+      getJson<HskLevel[]>('/api/curriculum/hsk-levels'),
+      getJson<LearningHome>('/api/learning/home'),
+    ])
+    hskLevels.value = levels
+    selectedHskLevelId.value = learning.state.selectedHskLevelId ?? levels[0]?.id ?? ''
+  } catch {
+    // The shell keeps its static HSK 3 fallback when learner data is unavailable.
+  }
+})
+
+async function selectHsk(event: Event) {
+  const levelId = (event.target as HTMLSelectElement).value
+  if (!levelId || hskChanging.value) return
+  hskChanging.value = true
+  try {
+    const state = await postJson<LearningState>(`/api/learning/hsk/${encodeURIComponent(levelId)}/select`)
+    selectedHskLevelId.value = state.selectedHskLevelId ?? levelId
+  } finally {
+    hskChanging.value = false
+  }
+}
 </script>
 
 <template>
@@ -50,9 +84,12 @@ const iconFor = (label: string) => icons[label] ?? '•'
     </div>
 
     <div class="app-current-level">
-      <span class="app-current-level__icon">3</span>
-      <span><small>Đang học</small><strong>HSK 3</strong></span>
-      <span class="app-current-level__chevron">⌄</span>
+      <span class="app-current-level__icon">{{ selectedHskLevel?.levelNumber ?? 3 }}</span>
+      <span><small>Đang học</small><strong>{{ selectedHskLabel }}</strong></span>
+      <select v-if="hskLevels.length" v-model="selectedHskLevelId" aria-label="Chọn cấp độ HSK" :disabled="hskChanging" @change="selectHsk">
+        <option v-for="level in hskLevels" :key="level.id" :value="level.id">{{ level.displayName }}</option>
+      </select>
+      <span v-else class="app-current-level__chevron">⌄</span>
     </div>
 
     <nav class="app-nav" aria-label="Điều hướng chính">
@@ -81,7 +118,7 @@ const iconFor = (label: string) => icons[label] ?? '•'
     <div class="app-sidebar__bottom">
       <RouterLink class="app-account" to="/app/profile" @click="closeOnNavigate">
         <span class="app-account__avatar">HV</span>
-        <span><strong>Học viên VietAIS</strong><small>HSK 3 · Đang học</small></span>
+        <span><strong>Học viên VietAIS</strong><small>{{ selectedHskLabel }} · Đang học</small></span>
         <span class="app-account__more">•••</span>
       </RouterLink>
     </div>

@@ -34,8 +34,9 @@ Timeline meaningful activities.
 - không biến thành gamification system lớn.
 
 ## Computer Use tests
-- [ ] progress summary;
-- [ ] weak point action;
-- [ ] history;
-- [ ] streak;
-- [ ] loading/empty states.
+- [x] progress summary;
+- [x] weak point action;
+- [x] history;
+- [x] streak;
+- [x] loading/empty states.
+- [x] overview hiển thị mastery theo từng knowledge item khi có practice/review result.

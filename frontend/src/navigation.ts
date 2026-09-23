@@ -15,7 +15,6 @@ export const navigation: NavGroup[] = [
       { label: 'Bài học', to: '/app/lessons' },
       {
         label: 'Kỹ năng',
-        to: '/app/skills',
         children: [
           { label: 'Nghe', to: '/app/skills/listening' },
           { label: 'Đọc', to: '/app/skills/reading' },
@@ -26,7 +25,6 @@ export const navigation: NavGroup[] = [
       },
       {
         label: 'Luyện tập',
-        to: '/app/practice',
         children: [
           { label: 'Từ vựng', to: '/app/practice/vocabulary' },
           { label: 'Chữ Hán', to: '/app/practice/hanzi' },

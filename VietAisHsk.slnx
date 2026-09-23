@@ -1,6 +1,7 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/VietAisHsk.Api/VietAisHsk.Api.csproj" />
+  <Folder Name="/backend/">
+    <Project Path="backend/VietAisHsk.Api/VietAisHsk.Api.csproj" />
+    <Project Path="backend/VietAisHsk.Workers/VietAisHsk.Workers.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/VietAisHsk.Api.Tests/VietAisHsk.Api.Tests.csproj" />

@@ -14,7 +14,7 @@
 Không dùng copy quảng cáo dài.
 
 ## Computer Use tests
-- [ ] filter HSK/topic;
-- [ ] detail;
-- [ ] CTA luyện tập đúng context;
-- [ ] responsive text không clipping.
+- [x] filter HSK/topic;
+- [x] detail;
+- [x] CTA luyện tập đúng context;
+- [x] responsive text không clipping.

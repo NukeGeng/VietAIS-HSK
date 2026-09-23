@@ -96,6 +96,17 @@ Tối thiểu:
 
 Curriculum chỉ sở hữu reference data; Practice sở hữu learner writing attempt.
 
+Bootstrap hiện cung cấp read catalog tối thiểu qua `BootstrapHanziCatalog` với provenance
+`PlatformAuthoredReferenceFixture`/`hanzi-reference-v1`/`platform-authored`. Đây là fixture để
+kiểm tra contract và UI, không được coi là dữ liệu HSK 3.0 chính thức. Catalog thật phải được
+import cùng source/version/license đã duyệt trước khi publish cho learner.
+
+Bootstrap hiện cũng cung cấp read catalog tối thiểu cho Vocabulary và Grammar qua
+`BootstrapKnowledgeCatalog`. Các endpoint hỗ trợ `search`, `hsk` và `topic` cho list; detail
+tra theo id hoặc khóa nội dung. Mọi record đều ghi provenance
+`PlatformAuthoredReferenceFixture`/`knowledge-reference-v1`/`platform-authored`. Đây là dữ liệu
+tham chiếu để kiểm tra contract và UI, chưa phải bộ HSK 3.0 chính thức.
+
 ### 4.6 Grammar
 
 - HSK mapping/version;
@@ -117,9 +128,13 @@ Archived
 
 Published content không được silently mutate theo cách làm hỏng learner history; thay đổi lớn cần version hoặc content revision strategy.
 
+Import HSK nhận cấu trúc `Topic → Unit → Lesson`; mọi lesson mới ở trạng thái Draft. Admin publish level trước, sau đó publish lesson riêng. Public tree chỉ trả Topic/Unit có ít nhất một Published lesson và learner chỉ có thể bắt đầu lesson đó. Version đã Published chỉ nhận lại import giống hệt như một thao tác idempotent; thay đổi nội dung phải dùng `SyllabusVersion` mới.
+
 ## 5. Invariants
 
 - HSK mapping luôn gắn SyllabusVersion.
+- HSK level `Id` phải duy nhất trên toàn bộ store; khi tạo syllabus version mới phải dùng level Id
+  mới để route/publish không mơ hồ và không làm thay đổi version đã publish.
 - Lesson không reference entity không tồn tại.
 - Learner chỉ đọc Published.
 - Hanzi stroke metadata phải có source/version/license reference khi đến từ external dataset.
@@ -195,6 +210,7 @@ Public/learner:
 ```text
 GET /api/curriculum/hsk-levels
 GET /api/curriculum/hsk/{level}/tree
+GET /api/curriculum/lessons/{id}
 GET /api/curriculum/beginner
 GET /api/vocabulary
 GET /api/vocabulary/{id}
@@ -202,11 +218,22 @@ GET /api/hanzi
 GET /api/hanzi/{id}
 GET /api/hanzi/{id}/strokes
 GET /api/grammar
+GET /api/grammar/{id}
 GET /api/foundation/pinyin
 GET /api/foundation/tones
 ```
 
+`GET /api/vocabulary` và `GET /api/grammar` nhận query tùy chọn `search`, `hsk`, `topic`.
+
 Admin endpoints nằm dưới `/api/admin/...` và yêu cầu `curriculum.manage`.
+
+Import dùng lại level Id đã thuộc version khác trả `409 Conflict`; retry cùng version và payload
+đã import là idempotent.
+
+```text
+GET  /api/admin/curriculum/hsk-levels
+POST /api/admin/curriculum/hsk-levels/{levelId}/lessons/{lessonId}/publish
+```
 
 ## 11. RabbitMQ
 
@@ -227,29 +254,33 @@ Content có thể cung cấp AudioAsset metadata; tránh circular dependency b�
 ## 14. Test cases
 
 ### Unit
-- [ ] syllabus version mapping;
-- [ ] publish validation;
-- [ ] lesson reference validation;
-- [ ] Hanzi stroke metadata source required.
+- [x] syllabus version mapping;
+- [x] publish validation;
+- [x] lesson reference validation;
+- [x] Hanzi stroke metadata source required.
 
 ### Integration
-- [ ] import idempotency/duplicate handling;
-- [ ] published-only learner queries;
-- [ ] beginner path references master data;
-- [ ] Hanzi stroke read endpoint.
+- [x] import idempotency/duplicate handling;
+- [x] published-only learner queries;
+- [x] published lesson read contract returns only Published lessons;
+- [x] beginner path references master data;
+- [x] Hanzi stroke read endpoint (bootstrap reference fixture);
 
 ### Permission
-- [ ] learner không mutate curriculum;
-- [ ] admin thiếu permission không publish.
+- [x] learner không mutate curriculum;
+- [x] admin thiếu permission không publish.
 
 ### Computer Use
-- [ ] Người mới bắt đầu load Pinyin/tone;
-- [ ] Nền tảng → Chữ Hán → xem stroke order;
-- [ ] search vocabulary/grammar đúng filter HSK.
+- [x] Người mới bắt đầu load Pinyin/tone;
+- [x] Nền tảng → Chữ Hán → xem stroke order (fixture);
+- [x] search vocabulary/grammar đúng filter HSK.
+- [x] Lộ trình HSK → mở lesson Published → start/complete.
 
 ## 15. Acceptance Criteria
 
-- [ ] HSK 3.0 và Beginner data có model rõ;
-- [ ] Pinyin/tone/Hanzi writing reference data đủ cho UI/Practice;
-- [ ] no learner progress stored here;
-- [ ] no AI/RabbitMQ misuse.
+- [x] HSK 3.0 import contract và Beginner data có model rõ; dataset HSK/CTI chính thức vẫn
+  được nạp qua import sau khi provenance được duyệt;
+- [x] Pinyin/tone/Hanzi writing reference data đủ cho UI/Practice fixture; catalog chính thức
+  vẫn tách khỏi fixture platform-authored;
+- [x] no learner progress stored here;
+- [x] no AI/RabbitMQ misuse.

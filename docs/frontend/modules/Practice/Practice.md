@@ -24,6 +24,10 @@ Context/tiến độ
 → Tiếp tục
 ```
 
+Question renderer hỗ trợ hai dạng: `options` dùng button lựa chọn cho câu multiple-choice;
+câu không có options dùng text input. Cả hai gửi cùng Practice answer contract và không nhận
+accepted answer từ API.
+
 ## Hanzi writing UI
 
 Là first-class screen/component.
@@ -54,9 +58,11 @@ Không hiển thị AI branding.
 
 ## Computer Use tests
 
-- [ ] vocabulary question;
-- [ ] Pinyin/tone;
-- [ ] Hanzi wrong stroke → retry;
-- [ ] Hanzi complete;
-- [ ] mobile canvas usable;
-- [ ] incorrect item dẫn tới review state sau integration.
+- [x] vocabulary question;
+- [x] Pinyin practice: `/app/pinyin` mở `/app/practice/pinyin`, trả lời Pinyin của `你好` không dấu thanh và hoàn tất `1/1` bằng platform-authored fixture;
+- [x] tone practice;
+- [x] Hanzi wrong stroke → retry;
+- [x] Hanzi complete;
+- [x] mobile canvas usable;
+- [x] incorrect item dẫn tới review state sau integration.
+- [x] Practice session refresh/resume: trả lời một câu, refresh, giữ lại câu trả lời và trạng thái `Correct`, sau đó complete.

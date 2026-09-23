@@ -37,9 +37,12 @@ Docs
 
 ## Design-template
 
-Hiện tại UI được duyệt bằng HTML/CSS trong `design-template/`.
+Hiện tại UI được duyệt bằng HTML/CSS trong `design-template/`. Đây là reference/QA fixture chạy độc
+lập, không phải production frontend.
 
-Production frontend chỉ implement sau khi page tương ứng được duyệt.
+Chỉ `frontend/` được build và deploy làm learner/admin UI production. Production frontend chỉ
+implement sau khi page tương ứng được duyệt, rồi đối chiếu lại với template; không duy trì hai bản
+runtime của cùng một màn hình.
 
 ## Branch flow gợi ý
 

@@ -44,6 +44,16 @@ Question metadata:
 
 Practice/Exam sử dụng published/versioned question reference.
 
+Bootstrap hiện có `IQuestionBank`/`BootstrapQuestionBank` cho read contract nội bộ của Practice.
+Catalog gồm một số fixture platform-authored cho vocabulary, tone, Hanzi, grammar, listening,
+reading và writing; mỗi record giữ status/source/version/license và `ContentVersion`. Learner đọc
+qua `GET /api/content/questions` hoặc Practice, còn admin có thể xem draft, lưu draft và publish
+qua `content.manage`. Đây vẫn là fixture để nối flow, chưa phải question bank HSK 3.0 chính thức.
+
+Extended content bootstrap đã có read/publish contract riêng: learner chỉ nhận record `Published`,
+có filter HSK/topic cho Story/Video/Resource; admin có thể xem draft và publish bằng permission
+`content.manage`. Đây là fixture có provenance, chưa phải CMS authoring đầy đủ.
+
 ## 5. Audio
 
 Flow:
@@ -69,6 +79,18 @@ Failed
 ```
 
 Không gọi CosyVoice khi learner bấm play.
+
+### Local contract đã triển khai
+
+Backend hiện có `AudioAsset`, `IAudioAssetStore` và `IAudioGenerationQueue` deterministic cho
+local/dev. `POST /api/admin/content/audio` yêu cầu `content.manage`, tạo asset `Pending` và
+enqueue đúng một `AudioGenerationRequested` theo `IdempotencyKey`; request trùng trả lại asset
+cũ, request trùng key nhưng khác nội dung trả `409`. `POST /api/admin/content/audio/{id}/retry`
+chỉ nhận asset `Failed`, tăng `AttemptCount` và tạo idempotency key cho attempt mới.
+
+`GET /api/admin/content/audio` phục vụ status cho admin; learner chỉ đọc được asset `Ready` qua
+`GET /api/content/audio/{id}`. Queue hiện là local seam để kiểm thử contract; adapter Wolverine /
+RabbitMQ, worker CosyVoice và storage thật vẫn là bước production cần cấu hình sau.
 
 ## 6. Stories
 
@@ -104,7 +126,7 @@ Không xây plugin marketplace/tool execution platform ở scope này.
 
 ```text
 Question
-QuestionVersion (nếu cần version tách)
+QuestionVersion (hoặc `ContentVersion` trên question ở bootstrap)
 AudioAsset
 AudioGenerationJob
 Story
@@ -128,7 +150,10 @@ Không Event Source CRUD content.
 
 ## 12. Queries
 
-- SearchPublishedQuestions (internal contract);
+- SearchPublishedQuestions (public read view không có answer key);
+- GetAdminQuestions;
+- SaveQuestionDraft;
+- PublishQuestion;
 - GetAudioAsset;
 - GetStories/GetStory;
 - GetVideos/GetVideo;
@@ -156,11 +181,14 @@ AI-assisted authoring offline/admin có thể là future tool nhưng không thu�
 
 ## 16. Test cases
 
-- [ ] unpublished content không tới learner;
-- [ ] question version/reference stable;
-- [ ] audio outbox/message idempotent;
-- [ ] retry failed audio;
-- [ ] story/video/resource filters;
-- [ ] permission admin;
-- [ ] Computer Use admin audio status;
-- [ ] Computer Use learner mở Story/Video/Tài liệu/Công cụ published.
+- [x] unpublished content không tới learner;
+- [x] question version/reference stable trong practice session;
+- [x] local audio request/queue idempotent; [x] optional Wolverine/RabbitMQ adapter được route
+  vào `vietais.audio.generate` khi production config bật; [ ] CosyVoice worker/outbox
+  operational deployment;
+- [x] retry failed audio;
+- [x] story/video/resource filters;
+- [x] permission admin cho extended-content list/publish;
+- [x] permission admin cho question draft/list/publish;
+- [x] Computer Use admin audio status;
+- [x] Computer Use learner mở Story/Video/Tài liệu/Công cụ published.

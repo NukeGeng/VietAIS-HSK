@@ -1,0 +1,12 @@
+.git
+.gitignore
+.DS_Store
+**/bin/
+**/obj/
+frontend/node_modules/
+frontend/dist/
+design-template/
+tests/
+docs/
+*.user
+*.suo

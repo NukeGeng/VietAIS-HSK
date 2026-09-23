@@ -1,6 +1,8 @@
 # Frontend Overview
 
-Production frontend chỉ bắt đầu sau khi page tương ứng đã được duyệt trong `design-template/`.
+`frontend/` là production UI duy nhất. Production frontend chỉ bắt đầu sau khi page tương ứng đã
+được duyệt trong `design-template/`; template chỉ là reference/QA fixture chạy độc lập trên cổng
+preview và không được import, build hoặc deploy cùng Vue.
 
 Stack:
 
@@ -12,7 +14,8 @@ Stack:
 
 ## Nguyên tắc
 
-- approved HTML/CSS là visual source of truth;
+- approved HTML/CSS trong `design-template/` là visual reference để đối chiếu;
+- chỉ `frontend/` được build/deploy làm runtime UI, không duy trì implementation thứ hai cho cùng route;
 - không redesign khi chuyển sang Vue;
 - visible UI dùng tiếng Việt đơn giản;
 - module frontend theo product capability, không theo mọi backend class;

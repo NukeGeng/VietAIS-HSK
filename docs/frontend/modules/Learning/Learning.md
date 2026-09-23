@@ -15,6 +15,8 @@ Không biến thành analytics dashboard lớn.
 - current/target level;
 - progress;
 - topic/unit/lesson tree.
+- level detail chỉ hiển thị lesson đã publish;
+- chọn HSK làm lộ trình hiện tại.
 
 ### Người mới bắt đầu
 Flow trực quan:
@@ -33,6 +35,7 @@ Pinyin
 - topic grouping;
 - status;
 - lesson detail.
+- start/complete lesson và giữ trạng thái sau khi reload.
 
 ## Routes gợi ý
 
@@ -49,9 +52,11 @@ Pinyin
 - LearningHome;
 - HskLevelCard;
 - CurriculumTree;
+- HskLevelDetail;
 - BeginnerStageCard;
 - LessonCard;
 - LessonOutline;
+- LessonDetail;
 - ContinueLearningCard.
 
 ## API dependencies
@@ -60,8 +65,9 @@ Identity profile/context + Curriculum + Learning.
 
 ## Computer Use tests
 
-- [ ] Trang chủ → Continue learning;
-- [ ] Lộ trình HSK → HSK 3 → lesson;
-- [ ] Beginner → Pinyin/tone stage;
-- [ ] complete lesson → UI cập nhật;
-- [ ] refresh không mất state.
+- [x] Trang chủ → Continue learning;
+- [x] Lộ trình HSK → HSK 3 → lesson;
+- [x] Beginner → Pinyin/tone stage;
+- [x] Bài học → tìm kiếm/lọc cấp độ → mở lesson detail;
+- [x] complete lesson → UI cập nhật;
+- [x] refresh không mất state.

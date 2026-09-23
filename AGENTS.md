@@ -24,9 +24,42 @@ For any module task:
 
 ## Current UI rule
 
-`design-template/` HTML/CSS is the approved visual source before Vue implementation.
+`frontend/` is the only production UI runtime. `design-template/` HTML/CSS is the approved panda
+visual reference/QA fixture before Vue implementation; it is not a second frontend and must not be
+imported into the production bundle.
 
-Do not use Figma as product UI source of truth.
+Khi làm bất kỳ task nào liên quan:
+
+```text
+HTML design-template
+Frontend
+Vue
+Admin UI
+Learner UI
+Responsive
+Layout
+
+docs/frontend/architecture/00-overview.md
+docs/frontend/architecture/01-ui-layout-rules.md
+
+PageHeader
+PageHero
+BlockingHeader
+ContentHeader lớn
+breadcrumb không cần thiết
+mô tả marketing đầu trang
+```
+
+Hai tài liệu layout bắt buộc là:
+
+```text
+docs/frontend/architecture/00-overview.md
+docs/frontend/architecture/01-ui-layout-rules.md
+```
+
+Mặc định phải theo `Content first. No blocking PageHeader by default.`: giữ tiêu đề ngắn,
+đưa filter/action gần nội dung và không thêm mô tả marketing, breadcrumb hoặc khoảng trắng lớn
+nếu sidebar đã cung cấp context.
 
 ## No architecture invention
 

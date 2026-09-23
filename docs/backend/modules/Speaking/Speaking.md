@@ -92,11 +92,11 @@ Cần usage/cost logging và session limits theo product policy.
 
 ## 11. Test cases
 
-- [ ] start/end session;
+- [x] start/end session; endpoint end phát `SpeakingSessionCompletedSignal` và retry end không tăng metric;
 - [ ] STT error handling;
-- [ ] AI timeout handling;
+- [x] AI timeout handling;
 - [ ] TTS failure handling;
-- [ ] level context preserved;
-- [ ] own-session permission;
-- [ ] no RabbitMQ per-turn;
+- [x] level context preserved; signal giữ `HskContext` của session;
+- [x] own-session permission;
+- [x] no RabbitMQ per-turn; provider được gọi trực tiếp qua seam, không có broker trong flow;
 - [ ] Computer Use/browser microphone flow khi environment cho phép.

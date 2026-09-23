@@ -25,8 +25,8 @@ Không hiển thị kỹ thuật `STT/TTS/LLM` cho learner.
 - nội dung nên luyện.
 
 ## Computer Use tests
-- [ ] permission microphone;
-- [ ] recording/loading/error states;
-- [ ] conversation scroll;
-- [ ] end summary;
-- [ ] provider failure graceful.
+- [ ] permission microphone — transport microphone chưa được chốt trong backend;
+- [x] session/loading/error states;
+- [x] transcript conversation render và responsive layout;
+- [x] end session;
+- [x] provider failure graceful.

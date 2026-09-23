@@ -79,6 +79,7 @@ trong business use case.
 - Learner chỉ sửa profile của mình.
 - Preferred/Target HSK phải reference level tồn tại khi validation có thể thực hiện.
 - Timezone phải là timezone identifier hợp lệ theo chuẩn app chọn.
+- PreferredStudyTime là null (chưa chọn) hoặc giờ địa phương dạng `HH:mm` 24 giờ; DailyMinutes từ 5 đến 240.
 
 ## 6. Data model
 
@@ -122,6 +123,7 @@ Chỉ phát application message khi module khác thực sự cần biết thay �
 | Method | Route | Permission | Mục đích |
 |---|---|---|---|
 | GET | `/api/me` | authenticated | profile hiện tại |
+| GET | `/api/me/authorization` | authenticated | permission/context hiện tại |
 | PUT | `/api/me/profile` | authenticated | sửa profile |
 | PUT | `/api/me/learning-target` | authenticated | HSK mục tiêu/preference |
 | GET | `/api/admin/users` | `users.manage` | list user |
@@ -148,23 +150,25 @@ Không để Identity phụ thuộc Learning progress.
 ## 14. Test cases
 
 ### Unit
-- [ ] learner không sửa profile user khác;
-- [ ] target/preference validation;
-- [ ] permission checks.
+- [x] learner không sửa profile user khác;
+- [x] target/preference validation;
+- [x] permission checks.
 
 ### Integration
-- [ ] first-login provisioning idempotent;
-- [ ] profile persistence;
-- [ ] admin user query.
+- [x] first-login provisioning idempotent;
+- [x] profile persistence;
+- [x] admin user query.
 
 ### Computer Use
-- [ ] login → mở Hồ sơ → sửa → reload vẫn đúng;
-- [ ] learner không truy cập admin users;
-- [ ] admin có permission truy cập được.
+- [x] login → mở Hồ sơ → sửa → reload vẫn đúng;
+- [x] learner không truy cập admin users;
+- [x] admin có permission truy cập được.
 
 ## 15. Acceptance Criteria
 
-- [ ] auth identity map đúng application user;
-- [ ] profile CRUD đúng scope;
-- [ ] permission không hard-code role name;
-- [ ] không có progress data bị sở hữu sai trong Identity.
+- [x] auth identity map đúng application user qua trusted `sub`/`NameIdentifier` claims; có
+  provider-agnostic JWT/OIDC boundary khi cấu hình Authority/Audience, còn local Development dùng
+  header adapter có chủ đích;
+- [x] profile CRUD đúng scope;
+- [x] permission không hard-code role name;
+- [x] không có progress data bị sở hữu sai trong Identity.

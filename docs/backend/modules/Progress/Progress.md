@@ -10,7 +10,7 @@ Progress chủ yếu là projection/read side, không phải write aggregate l�
 
 - Learning lesson/milestone events;
 - Practice result messages;
-- Review result messages;
+- Review result/activity signals;
 - Exam result events;
 - Translation activity/result signal;
 - SpeakingSessionCompleted.
@@ -71,6 +71,8 @@ UserLearningHistory
 UserStudyStreak
 ```
 
+Bootstrap hiện lưu một `ProgressProjectionDocument` per learner trong Marten: input Practice, Review, Exam, Translation và Speaking có event key ổn định, activity history có key idempotent, cùng snapshot/weak points đã materialize. Kết quả Review đúng trừ một evidence weak-point; Review sai cộng evidence theo rule deterministic; câu sai trong Exam tạo weak-point `ExamIncorrect`. Translation chỉ ghi nhận attempt, không tự chấm đúng/sai; Speaking chỉ ghi nhận session hoàn tất và số lượt nói, không tạo score giả khi provider chưa có. `ProgressProjectionBuilder` dựng lại các giá trị đọc từ inputs đã lưu; đây là document projection, không Event Source aggregate của Progress. Khi không cấu hình PostgreSQL, API giữ in-memory fallback.
+
 Có thể có inline/minimal immediate projection nếu UI cần feedback ngay sau action, nhưng tránh duplicate logic.
 
 ## 5. Queries
@@ -99,16 +101,25 @@ Không.
 
 - user isolation;
 - projection replay/rebuild cho kết quả nhất quán;
+- duplicate practice event/activity không làm tăng projection lần hai;
 - no click-based streak;
 - weakness rule version/config traceable khi thay đổi đáng kể.
 
 ## 9. Test cases
 
-- [ ] practice result updates mastery;
-- [ ] repeated Hanzi writing error tạo weakness;
-- [ ] review success cải thiện state theo rule;
-- [ ] timezone streak boundary;
-- [ ] duplicate event idempotency;
-- [ ] projection rebuild;
-- [ ] Computer Use: Progress → Điểm yếu → action link đúng;
-- [ ] Computer Use: Chuỗi ngày học hiển thị đúng sample data.
+- [x] practice + review result updates deterministic mastery read model;
+- [x] repeated Hanzi writing error tạo weakness; hai completion sai tạo `hanzi-writing/WritingWeak` với evidence cộng dồn;
+- [x] review success cải thiện state theo rule;
+- [x] exam result cập nhật metrics và weak-point theo câu sai;
+- [x] timezone streak boundary: `/api/progress/streak` lấy timezone từ Identity profile và builder có test crossing midnight;
+- [x] duplicate event idempotency;
+- [x] projection rebuild;
+- [x] Computer Use: Progress → Điểm yếu → action link đúng; `WritingWeak` mở `/app/hanzi/{id}/write`;
+- [x] Computer Use: Chuỗi ngày học hiển thị đúng sample data.
+
+## 10. Giới hạn bootstrap còn lại
+
+- Hiện đã nối Learning lesson completion, Practice result/session completion và Review item result vào Progress.
+- Exam, Translation và Speaking đã phát input signal vào Progress; Translation/Speaking metrics đã có trong snapshot.
+- Review result phát `ReviewEvaluationSignal` idempotent vào Progress; hiện dùng evidence weak-point deterministic, chưa có mastery model riêng.
+- `/api/progress/streak` lấy timezone từ Identity profile; timezone không hợp lệ bị Identity validation từ chối và builder fallback UTC cho dữ liệu legacy.

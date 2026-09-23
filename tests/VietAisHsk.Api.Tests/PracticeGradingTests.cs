@@ -23,4 +23,14 @@ public sealed class PracticeGradingTests
 
         Assert.Equal(PracticeResult.Incorrect, result);
     }
+
+    [Theory]
+    [InlineData("1")]
+    [InlineData("thanh 1")]
+    public void Tone_options_use_the_same_deterministic_accepted_answer_rule(string answer)
+    {
+        var question = new PracticeQuestion("q-tone", "tone", "mā", ["1", "thanh 1"], Options: ["1", "2", "3", "4"]);
+
+        Assert.Equal(PracticeResult.Correct, PracticeGrading.Grade(question, answer));
+    }
 }

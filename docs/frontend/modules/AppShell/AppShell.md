@@ -43,9 +43,9 @@ Mobile: drawer; active route và submenu vẫn phải rõ.
 
 ## Computer Use tests
 
-- [ ] desktop sidebar đúng group/order;
-- [ ] active parent + child đúng;
-- [ ] mobile drawer mở/đóng;
-- [ ] HSK selector không phá route;
-- [ ] refresh giữ active route;
-- [ ] không có text clipping tiếng Việt.
+- [x] desktop sidebar đúng group/order;
+- [x] active parent + child đúng;
+- [x] mobile drawer mở/đóng;
+- [x] HSK selector không phá route;
+- [x] refresh giữ active route;
+- [x] không có text clipping tiếng Việt.

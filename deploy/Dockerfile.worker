@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY backend/VietAisHsk.Api/VietAisHsk.Api.csproj backend/VietAisHsk.Api/
+COPY backend/VietAisHsk.Workers/VietAisHsk.Workers.csproj backend/VietAisHsk.Workers/
+RUN dotnet restore backend/VietAisHsk.Workers/VietAisHsk.Workers.csproj
+
+COPY backend/ backend/
+RUN dotnet publish backend/VietAisHsk.Workers/VietAisHsk.Workers.csproj \
+    --configuration Release \
+    --no-restore \
+    --output /app/publish \
+    /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "VietAisHsk.Workers.dll"]

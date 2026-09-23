@@ -67,12 +67,12 @@ Không gọi mọi điểm là `AI score`.
 
 ## Computer Use tests
 
-- [ ] start exam;
-- [ ] answer + next/previous;
-- [ ] refresh/resume;
-- [ ] submit confirm;
-- [ ] double submit không tạo lỗi UX;
-- [ ] objective result hiển thị;
-- [ ] pending subjective grading state;
-- [ ] final result;
-- [ ] mobile/focus layout.
+- [x] start exam;
+- [x] answer + next/previous;
+- [x] refresh/resume;
+- [x] submit confirm;
+- [x] double submit không tạo lỗi UX;
+- [x] objective result hiển thị;
+- [x] pending subjective grading state;
+- [x] final result;
+- [x] mobile/focus layout.

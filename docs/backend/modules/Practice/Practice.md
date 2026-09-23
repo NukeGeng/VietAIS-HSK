@@ -111,6 +111,7 @@ Incorrect
 - Question/content reference phải tồn tại/published khi session bắt đầu.
 - Hanzi attempt phải dùng stroke dataset version cố định trong attempt để tránh result thay đổi giữa session.
 - Complete session idempotent.
+- PracticeSession phải tiếp tục được đọc/hoàn thành sau refresh hoặc API restart khi dùng PostgreSQL.
 
 ## 6. Data model
 
@@ -123,7 +124,7 @@ PracticeResult
 HanziWritingAttempt
 ```
 
-Question definition thuộc Content/QuestionBank; knowledge reference thuộc Curriculum.
+Question definition thuộc Content/QuestionBank; knowledge reference thuộc Curriculum. Session state được lưu như Marten document khi có PostgreSQL; không event-source toàn bộ session. `AcceptedAnswers` chỉ tồn tại trong private store model, không có trong learner view.
 
 ### Events/messages
 
@@ -177,7 +178,7 @@ POST /api/practice/hanzi/attempts/{id}/complete
 
 Không cho core grading.
 
-Practice result → Review/Progress nên dùng local Wolverine/durable messaging trong modular monolith khi cần, không cần RabbitMQ broker.
+Practice result → Review/Progress hiện dùng internal signal contracts và Marten-backed sinks trong bootstrap; durable Wolverine/local messaging có thể thay thế khi cần, không cần RabbitMQ broker.
 
 ## 11. AI
 
@@ -192,29 +193,29 @@ Không.
 ## 13. Test cases
 
 ### Unit
-- [ ] multiple-choice grading;
-- [ ] accepted-answer grading;
-- [ ] tone/Pinyin grading;
-- [ ] Hanzi stroke order/direction/tolerance fixtures;
-- [ ] completion idempotency.
+- [x] multiple-choice grading (Content options không lộ accepted answers);
+- [x] accepted-answer grading;
+- [x] tone/Pinyin grading;
+- [x] Hanzi stroke order/direction/tolerance fixtures;
+- [x] completion idempotency.
 
 ### Integration
-- [ ] session persistence;
-- [ ] published question selection;
-- [ ] result signal delivered;
-- [ ] stroke dataset version captured.
+- [x] session persistence;
+- [x] published question selection;
+- [x] result signal delivered;
+- [x] stroke dataset version captured.
 
 ### Computer Use
-- [ ] Pinyin practice;
-- [ ] tone practice;
-- [ ] vocabulary practice;
-- [ ] Hanzi Guided → sai nét → feedback → retry;
-- [ ] Hanzi Recall complete → result;
-- [ ] incorrect item xuất hiện trong Nội dung cần ôn theo rule.
+- [x] Pinyin practice;
+- [x] tone practice;
+- [x] vocabulary practice;
+- [x] Hanzi Guided → sai nét → feedback → retry;
+- [x] Hanzi Recall complete → result;
+- [x] incorrect item xuất hiện trong Nội dung cần ôn theo rule.
 
 ## 14. Acceptance Criteria
 
-- [ ] deterministic grading không gọi AI;
-- [ ] Hanzi writing là first-class practice;
-- [ ] lỗi/signal đủ cho Review/Progress;
-- [ ] refresh không mất active session ngoài rule được chấp nhận.
+- [x] deterministic grading không gọi AI;
+- [x] Hanzi writing là first-class practice;
+- [x] lỗi/signal đủ cho Review/Progress;
+- [x] refresh không mất active session ngoài rule được chấp nhận.

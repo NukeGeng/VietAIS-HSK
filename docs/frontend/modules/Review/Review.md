@@ -31,8 +31,9 @@ Có thể gồm:
 Mỗi item phải có action phù hợp.
 
 ## Computer Use tests
-- [ ] review summary;
-- [ ] needs-review filters;
-- [ ] Hanzi weak → mở đúng writing flow;
-- [ ] mistakes → làm lại;
-- [ ] empty state.
+- [x] review summary;
+- [x] needs-review list hiển thị item sau Practice trả lời sai;
+- [x] Hanzi weak → mở đúng writing flow;
+- [x] mistakes → làm lại;
+- [x] empty state.
+- [x] needs-review filter theo loại nội dung.

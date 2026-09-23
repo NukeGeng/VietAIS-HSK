@@ -26,8 +26,8 @@ Nền tảng → Từ vựng dùng để học/tra cứu, không phải practice
 - chữ cấu tạo/từ liên quan khi có.
 
 ## Computer Use tests
-- [ ] tìm kiếm;
-- [ ] filter HSK/topic;
-- [ ] audio control;
-- [ ] Pinyin/Chinese không lỗi font;
-- [ ] detail responsive.
+- [x] tìm kiếm;
+- [x] filter HSK/topic;
+- [x] audio control;
+- [x] Pinyin/Chinese không lỗi font;
+- [x] detail responsive.

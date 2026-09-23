@@ -11,9 +11,12 @@ Cung cấp phần Nền tảng → Chữ Hán và giao diện học/tra cứu ch
 /app/hanzi/:id             Chi tiết chữ
 /app/hanzi/:id/strokes     Thứ tự nét
 /app/hanzi/:id/write       Luyện viết
+/app/hanzi/related         Từ liên quan theo catalog
 ```
 
-`Từ liên quan` có thể là tab/section trong detail thay vì page độc lập nếu UX tốt hơn.
+`Từ liên quan` có thể là tab/section trong detail thay vì page độc lập nếu UX tốt hơn. Khi
+được expose trong sidebar, route này phải dùng cùng catalog read contract, không dùng page
+placeholder hoặc copy marketing.
 
 ## Danh sách chữ
 
@@ -71,10 +74,10 @@ Không dùng điểm số giả/AI score.
 
 ## Computer Use tests
 
-- [ ] filter/search Hanzi;
-- [ ] detail renders Chinese/Pinyin đúng;
-- [ ] stroke animation;
-- [ ] Guided writing;
-- [ ] Recall writing;
-- [ ] retry flow;
-- [ ] responsive/mobile canvas.
+- [x] filter/search Hanzi;
+- [x] detail renders Chinese/Pinyin đúng;
+- [x] stroke animation;
+- [x] Guided writing;
+- [x] Recall writing;
+- [x] retry flow;
+- [x] responsive/mobile canvas.

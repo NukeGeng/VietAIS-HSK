@@ -46,4 +46,6 @@ Product scope
 → Implement/Test
 ```
 
-`design-template/` là source of truth trực quan của UI; `docs/` là source of truth nghiệp vụ/kỹ thuật.
+`design-template/` là reference/QA fixture trực quan của UI; `frontend/` là runtime UI production duy
+nhất; `docs/` là source of truth nghiệp vụ/kỹ thuật. Template được chạy độc lập để đối chiếu visual,
+không được deploy như frontend thứ hai và không được import vào production bundle.

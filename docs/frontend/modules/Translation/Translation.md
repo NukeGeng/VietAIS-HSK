@@ -22,7 +22,7 @@ AI chỉ gọi khi user bấm `Nhận góp ý`.
 - Gợi ý sửa.
 
 ## Computer Use tests
-- [ ] submit không tự gọi feedback UI;
-- [ ] request feedback loading/error;
-- [ ] feedback render;
-- [ ] history if implemented.
+- [x] submit không tự gọi feedback UI;
+- [x] request feedback loading/error;
+- [x] provider unavailable hiển thị lỗi an toàn và giữ attempt;
+- [x] history render trên desktop/mobile.

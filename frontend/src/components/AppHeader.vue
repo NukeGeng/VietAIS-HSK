@@ -9,7 +9,7 @@ const ui = useUiStore()
 <template>
   <header class="app-topbar">
     <button class="app-menu-button" type="button" aria-label="Mở menu" @click="ui.mobileDrawerOpen = true"><span>☰</span></button>
-    <div class="app-breadcrumb"><span>Học tập</span><span aria-hidden="true">/</span><strong>{{ route.meta.title ?? 'Tổng quan' }}</strong></div>
+    <div class="app-topbar__title"><strong>{{ route.meta.title ?? 'Tổng quan' }}</strong></div>
     <div class="app-topbar__actions">
       <button class="app-icon-button" type="button" aria-label="Thông báo">♢<span class="app-notification-dot" /></button>
       <RouterLink class="app-avatar-button" to="/app/profile" aria-label="Mở tài khoản">HV</RouterLink>

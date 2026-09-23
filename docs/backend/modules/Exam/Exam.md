@@ -114,7 +114,16 @@ GET  /api/exam-attempts/{id}
 POST /api/exam-attempts/{id}/answers
 POST /api/exam-attempts/{id}/submit
 GET  /api/exam-attempts/{id}/result
+POST /api/exam-attempts/{id}/subjective-grading
 ```
+
+Đã triển khai thêm `GET /api/exams/{examId}` để màn hình chi tiết đề thi
+không phải suy đoán dữ liệu từ catalog. Definition trả ra public question
+view và `contentVersion`; không trả accepted answers hoặc event stream.
+
+Exam question có thể mang `QuestionType` và reference `KnowledgeType/KnowledgeId`. Khi submit,
+những reference này được phát trong `ExamResultSignal.KnowledgeResults` để Review/Progress dùng
+đúng contract, không copy master data.
 
 ## 11. RabbitMQ
 
@@ -146,19 +155,23 @@ AI score phải được ghi rõ là practice evaluation, không giả là offic
 
 ## 14. Test cases
 
-- [ ] start/resume;
-- [ ] answer persistence;
-- [ ] refresh giữa bài;
-- [ ] double submit;
-- [ ] objective score deterministic;
-- [ ] AI job outbox atomicity;
-- [ ] duplicate AI result idempotent;
-- [ ] permission own-attempt;
-- [ ] Computer Use full exam flow.
+- [x] start/resume;
+- [x] answer persistence;
+- [x] refresh giữa bài;
+- [x] double submit;
+- [x] objective score deterministic;
+- [x] local subjective job request có correlation/idempotency; [x] optional Wolverine/RabbitMQ
+  adapter route message vào `vietais.exam.subjective-grading`; [x] HMAC-authenticated production
+  worker callback boundary; [x] worker consumer process + fail-closed callback smoke; [ ] AI
+  grading provider thật/deployment;
+- [x] duplicate subjective result idempotent ở local callback seam;
+- [x] permission own-attempt;
+- [x] Computer Use full exam flow.
 
 ## 15. Acceptance Criteria
 
-- [ ] event replay reconstruct current state;
-- [ ] no objective AI grading;
-- [ ] refresh/resume ổn định;
-- [ ] result signals integrate Review/Progress.
+- [x] event replay reconstruct current state;
+- [x] no objective AI grading;
+- [x] refresh/resume ổn định;
+- [x] result signal integrate Review/Progress; Progress tạo weak-point `ExamIncorrect`, Review
+  nhận `ExamKnowledgeResult` cho câu sai và dedupe theo attempt/question.

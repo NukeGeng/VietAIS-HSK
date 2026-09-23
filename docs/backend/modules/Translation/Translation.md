@@ -94,9 +94,9 @@ Có — đúng use case đã duyệt.
 
 ## 12. Test cases
 
-- [ ] attempt saved without AI;
-- [ ] AI only after explicit request;
-- [ ] structured schema validation;
-- [ ] timeout/failure UI-safe;
-- [ ] permission own attempt;
-- [ ] Computer Use full flow.
+- [x] attempt saved without AI; `identity-smoke.mjs` và HTTP QA xác nhận attempt được lưu và phát `TranslationAttemptSignal` vào Progress;
+- [x] AI only after explicit request; feedback chỉ gọi gateway ở endpoint `/feedback`, submit không gọi provider;
+- [x] structured schema validation;
+- [x] timeout/failure UI-safe;
+- [x] permission own attempt;
+- [x] Computer Use full flow.
