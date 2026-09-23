@@ -6,6 +6,7 @@ docs/
 │   ├── 00-navigation-and-learning-flow.md
 │   └── 01-feature-scope.md
 ├── architecture/
+│   └── 08-repository-layout.md
 ├── data/
 ├── security/
 ├── backend/
@@ -49,3 +50,5 @@ Product scope
 `design-template/` là reference/QA fixture trực quan của UI; `frontend/` là runtime UI production duy
 nhất; `docs/` là source of truth nghiệp vụ/kỹ thuật. Template được chạy độc lập để đối chiếu visual,
 không được deploy như frontend thứ hai và không được import vào production bundle.
+
+Ranh giới thư mục được kiểm tra bằng `node scripts/verify-repository-layout.mjs`.

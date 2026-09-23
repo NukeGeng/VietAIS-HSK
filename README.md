@@ -9,7 +9,7 @@ Nền tảng học tiếng Trung theo lộ trình HSK 3.0.
 - `backend/VietAisHsk.Api/` — API Modular Monolith ASP.NET Core;
 - `backend/VietAisHsk.Workers/` — process worker riêng cho các job async, không nằm trong API process;
 - `scripts/` — smoke test HTTP tích hợp;
-- `design-template/` — mẫu HTML/CSS đã duyệt để đối chiếu khi làm UI trong `frontend/`; không phải production frontend.
+- `design-template/` — checkout mẫu HTML/CSS panda đã duyệt để đối chiếu khi làm UI trong `frontend/`; không phải production frontend và không được import vào bundle.
 
 ## Kiểm tra nhanh
 
@@ -36,6 +36,12 @@ curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:8766/index.html
 
 Kết quả đúng là `200`. Preview này chỉ phục vụ `design-template/`, không thay thế
 frontend Vue production.
+
+Kiểm tra ranh giới repository trước khi build:
+
+```bash
+node scripts/verify-repository-layout.mjs
+```
 
 Lưu ý route: các đường dẫn dạng `/app/skills/listening` là route của frontend
 Vue trên `http://127.0.0.1:5173`. Preview HTML dùng các file tĩnh tương ứng,
